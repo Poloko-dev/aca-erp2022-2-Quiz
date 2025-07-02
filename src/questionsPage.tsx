@@ -86,7 +86,7 @@ const QuestionsPage: React.FC = () => {
               </div>
             ))}
             <div className="score-display">
-               Your Score: {score} / {questions.length}
+               Your Score: {score} / {questions.length} 
             </div>
           </>
         ) : (
