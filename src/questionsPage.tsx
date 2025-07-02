@@ -14,6 +14,7 @@ const QuestionsPage: React.FC = () => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [userAnswers, setUserAnswers] = useState<{ [key: number]: string }>({});
   const [score, setScore] = useState<number | null>(null);
+  const [reviewMode, setReviewMode] = useState(false);
 
   useEffect(() => {
     setQuestions(questionsData);
@@ -41,48 +42,81 @@ const QuestionsPage: React.FC = () => {
       if (userAnswers[q.id] === q.answer) total++;
     });
     setScore(total);
+    setReviewMode(true);
   };
 
   if (questions.length === 0) return <div>Loading...</div>;
-
-  const currentQuestion = questions[currentIndex];
 
   return (
     <div className="questions-container">
       <header className="header-gradient">
         <h1>React + GitHub Beginner Assessment</h1>
-        <p>Question {currentIndex + 1} of {questions.length}</p>
+        <p>
+          {reviewMode
+            ? 'Review Mode'
+            : `Question ${currentIndex + 1} of ${questions.length}`}
+        </p>
       </header>
 
       <main className="question-card">
-        <h2>{currentQuestion.question}</h2>
-        <div className="options-container">
-          {currentQuestion.options.map(option => (
-            <button
-              key={option}
-              onClick={() => handleOptionSelect(option)}
-              className={`option-button ${userAnswers[currentQuestion.id] === option ? 'selected' : ''}`}
-            >
-              {option}
-            </button>
-          ))}
-        </div>
+        {reviewMode ? (
+          <>
+            {questions.map((q, index) => (
+              <div key={q.id} className="question-review-card">
+                <h3>
+                  Q{index + 1}: {q.question}
+                </h3>
+                <div className="options-container">
+                  {q.options.map(option => {
+                    const isCorrect = option === q.answer;
+                    const isUserChoice = userAnswers[q.id] === option;
+                    return (
+                      <div
+                        key={option}
+                        className={`option-button
+                          ${isCorrect ? 'correct' : ''}
+                          ${isUserChoice && !isCorrect ? 'wrong' : ''}
+                        `}
+                      >
+                        {option}
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            ))}
+            <div className="score-display">
+               Your Score: {score} / {questions.length}
+            </div>
+          </>
+        ) : (
+          <>
+            <h2>{questions[currentIndex].question}</h2>
+            <div className="options-container">
+              {questions[currentIndex].options.map(option => (
+                <button
+                  key={option}
+                  onClick={() => handleOptionSelect(option)}
+                  className={`option-button ${
+                    userAnswers[questions[currentIndex].id] === option ? 'selected' : ''
+                  }`}
+                >
+                  {option}
+                </button>
+              ))}
+            </div>
 
-        <div className="navigation-buttons">
-          <button onClick={handlePrevious} disabled={currentIndex === 0}>
-            Previous
-          </button>
-          {currentIndex < questions.length - 1 ? (
-            <button onClick={handleNext}>Next</button>
-          ) : (
-            <button onClick={handleSubmit}>Submit</button>
-          )}
-        </div>
-
-        {score !== null && (
-          <div className="score-display">
-            Your Score: {score} / {questions.length}
-          </div>
+            <div className="navigation-buttons">
+              <button onClick={handlePrevious} disabled={currentIndex === 0}>
+                Previous
+              </button>
+              {currentIndex < questions.length - 1 ? (
+                <button onClick={handleNext}>Next</button>
+              ) : (
+                <button onClick={handleSubmit}>Submit</button>
+              )}
+            </div>
+          </>
         )}
       </main>
     </div>
