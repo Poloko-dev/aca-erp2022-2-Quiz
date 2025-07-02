@@ -44,3 +44,29 @@ You don’t have to ever use `eject`. The curated feature set is suitable for sm
 You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
 
 To learn React, check out the [React documentation](https://reactjs.org/).
+
+# Deloyed Application link
+[Deployed application](https://aca-erp2022-2-quiz-sable.vercel.app/)
+
+# Github Repository Link
+[Codbase](https://github.com/Poloko-dev/aca-erp2022-2-Quiz.git)
+
+## Features
+
+- Load questions from a local JSON file
+- Answer one question at a time
+- Navigation: Previous / Next / Submit
+- Score displayed after submission
+- **Review All**: Shows all questions with:
+  - Correct answers in green
+  - Incorrect answers in red
+
+---
+
+## Setup Instructions
+
+### 1. Clone the Repository
+
+```bash
+git clone https://github.com/your-username/your-repo-name.git
+cd your-repo-name
