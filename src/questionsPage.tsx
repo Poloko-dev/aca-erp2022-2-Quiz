@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import './questionsPage.css';
 
 interface Question {
-  _id?: string; // MongoDB adds this
+  _id?: string;
   id: number;
   question: string;
   options: string[];
