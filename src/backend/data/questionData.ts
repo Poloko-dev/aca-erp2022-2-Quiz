@@ -1,5 +1,6 @@
-[
-  {
+const questions = [
+
+ {
     "id": 1,
     "question": "What command is used to initialize a new Git repository?",
     "options": ["git start", "git init", "git new", "git create"],
@@ -301,4 +302,8 @@
     "options": ["Data fetch", "Routing and navigation", "Styling", "Database connection"],
     "answer": "Routing and navigation"
   }
+
+
 ]
+
+export default questions;

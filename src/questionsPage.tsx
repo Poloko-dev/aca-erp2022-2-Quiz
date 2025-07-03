@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react';
-import questionsData from './questions.json';
 import './questionsPage.css';
 
 interface Question {
+  _id?: string; // MongoDB adds this
   id: number;
   question: string;
   options: string[];
@@ -15,37 +15,56 @@ const QuestionsPage: React.FC = () => {
   const [userAnswers, setUserAnswers] = useState<{ [key: number]: string }>({});
   const [score, setScore] = useState<number | null>(null);
   const [reviewMode, setReviewMode] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    setQuestions(questionsData);
+    fetch('http://localhost:5000/api/questions')
+      .then((res) => {
+        if (!res.ok) throw new Error('Failed to load questions');
+        return res.json();
+      })
+      .then((data) => {
+        setQuestions(data);
+        setLoading(false);
+      })
+      .catch((err) => {
+        setError(err.message);
+        setLoading(false);
+      });
   }, []);
 
   const handleOptionSelect = (option: string) => {
-    setUserAnswers(prev => ({ ...prev, [questions[currentIndex].id]: option }));
+    setUserAnswers((prev) => ({
+      ...prev,
+      [questions[currentIndex].id]: option,
+    }));
   };
 
   const handleNext = () => {
     if (currentIndex < questions.length - 1) {
-      setCurrentIndex(prev => prev + 1);
+      setCurrentIndex((prev) => prev + 1);
     }
   };
 
   const handlePrevious = () => {
     if (currentIndex > 0) {
-      setCurrentIndex(prev => prev - 1);
+      setCurrentIndex((prev) => prev - 1);
     }
   };
 
   const handleSubmit = () => {
     let total = 0;
-    questions.forEach(q => {
+    questions.forEach((q) => {
       if (userAnswers[q.id] === q.answer) total++;
     });
     setScore(total);
     setReviewMode(true);
   };
 
-  if (questions.length === 0) return <div>Loading...</div>;
+  if (loading) return <div>Loading questions...</div>;
+  if (error) return <div>Error: {error}</div>;
+  if (questions.length === 0) return <div>No questions found.</div>;
 
   return (
     <div className="questions-container">
@@ -67,7 +86,7 @@ const QuestionsPage: React.FC = () => {
                   Q{index + 1}: {q.question}
                 </h3>
                 <div className="options-container">
-                  {q.options.map(option => {
+                  {q.options.map((option) => {
                     const isCorrect = option === q.answer;
                     const isUserChoice = userAnswers[q.id] === option;
                     return (
@@ -86,19 +105,21 @@ const QuestionsPage: React.FC = () => {
               </div>
             ))}
             <div className="score-display">
-               Your Score: {score} / {questions.length} 
+              Your Score: {score} / {questions.length}
             </div>
           </>
         ) : (
           <>
             <h2>{questions[currentIndex].question}</h2>
             <div className="options-container">
-              {questions[currentIndex].options.map(option => (
+              {questions[currentIndex].options.map((option) => (
                 <button
                   key={option}
                   onClick={() => handleOptionSelect(option)}
                   className={`option-button ${
-                    userAnswers[questions[currentIndex].id] === option ? 'selected' : ''
+                    userAnswers[questions[currentIndex].id] === option
+                      ? 'selected'
+                      : ''
                   }`}
                 >
                   {option}
