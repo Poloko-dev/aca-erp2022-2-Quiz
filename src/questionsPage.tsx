@@ -19,7 +19,7 @@ const QuestionsPage: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    fetch('http://localhost:5000/api/questions')
+    fetch('https://aca-erp2022-2-quiz.onrender.com/api/questions')
       .then((res) => {
         if (!res.ok) throw new Error('Failed to load questions');
         return res.json();
