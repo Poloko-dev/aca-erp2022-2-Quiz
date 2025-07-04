@@ -9,6 +9,12 @@ interface Question {
   answer: string;
 }
 
+interface LeaderboardEntry {
+  userId: string;
+  email: string;
+  score: number;
+}
+
 const QuestionsPage: React.FC = () => {
   const [questions, setQuestions] = useState<Question[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -17,6 +23,8 @@ const QuestionsPage: React.FC = () => {
   const [reviewMode, setReviewMode] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([]);
+  const [currentUserId, setCurrentUserId] = useState<string>('');
 
   useEffect(() => {
     const token = localStorage.getItem('token');
@@ -93,8 +101,23 @@ const QuestionsPage: React.FC = () => {
         if (!res.ok) throw new Error('Failed to save score');
         return res.json();
       })
-      .then((data) => console.log('Score saved:', data))
+      .then((data) => {
+        console.log('Score saved:', data);
+        setCurrentUserId(data.userId); // Expect backend to return userId
+        fetchLeaderboard(token);
+      })
       .catch((err) => console.error('Failed to save score', err));
+  };
+
+  const fetchLeaderboard = (token: string) => {
+    fetch('https://aca-erp2022-2-quiz.onrender.com/api/score/leaderboard', {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    })
+      .then((res) => res.json())
+      .then((data) => setLeaderboard(data))
+      .catch((err) => console.error('Failed to fetch leaderboard', err));
   };
 
   if (loading) return <div>Loading questions...</div>;
@@ -114,35 +137,56 @@ const QuestionsPage: React.FC = () => {
 
       <main className="question-card">
         {reviewMode ? (
-          <>
-            {questions.map((q, index) => (
-              <div key={q.id} className="question-review-card">
-                <h3>
-                  Q{index + 1}: {q.question}
-                </h3>
-                <div className="options-container">
-                  {q.options.map((option) => {
-                    const isCorrect = option === q.answer;
-                    const isUserChoice = userAnswers[q.id] === option;
-                    return (
-                      <div
-                        key={option}
-                        className={`option-button
-                          ${isCorrect ? 'correct' : ''}
-                          ${isUserChoice && !isCorrect ? 'wrong' : ''}
-                        `}
-                      >
-                        {option}
-                      </div>
-                    );
-                  })}
+          <div className="review-leaderboard-container">
+            <div className="review-section">
+              {questions.map((q, index) => (
+                <div key={q.id} className="question-review-card">
+                  <h3>
+                    Q{index + 1}: {q.question}
+                  </h3>
+                  <div className="options-container">
+                    {q.options.map((option) => {
+                      const isCorrect = option === q.answer;
+                      const isUserChoice = userAnswers[q.id] === option;
+                      return (
+                        <div
+                          key={option}
+                          className={`option-button
+                            ${isCorrect ? 'correct' : ''}
+                            ${isUserChoice && !isCorrect ? 'wrong' : ''}
+                          `}
+                        >
+                          {option}
+                        </div>
+                      );
+                    })}
+                  </div>
                 </div>
+              ))}
+              <div className="score-display">
+                Your Score: {score} / {questions.length}
               </div>
-            ))}
-            <div className="score-display">
-              Your Score: {score} / {questions.length}
             </div>
-          </>
+
+            <div className="leaderboard">
+              <h3>Leaderboard</h3>
+              <ul>
+                {leaderboard.map((entry, index) => (
+                  <li
+                    key={entry.userId}
+                    style={{
+                      fontWeight:
+                        entry.userId === currentUserId ? 'bold' : 'normal',
+                      color:
+                        entry.userId === currentUserId ? 'green' : 'black',
+                    }}
+                  >
+                    {index + 1}. {entry.email} - {entry.score}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </div>
         ) : (
           <>
             <h2>{questions[currentIndex].question}</h2>
