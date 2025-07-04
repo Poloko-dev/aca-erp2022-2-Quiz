@@ -13,18 +13,22 @@ const app = express();
 
 dbConnection();
 
+if (!process.env.SESSION_SECRET) {
+  throw new Error('SESSION_SECRET environment variable is not set!');
+}
+
 app.use(session({
-  secret: process.env.SESSION_SECRET || 'your-secret-key',
+  secret: process.env.SESSION_SECRET,
   resave: false,
   saveUninitialized: false,
   store: MongoStore.create({
-    mongoUrl: process.env.MONGODB_URI || 'your-mongodb-connection-string',
+    mongoUrl: process.env.MONGODB_URI!,
     collectionName: 'sessions',
-    ttl: 24 * 60 * 60, // 1 day in seconds
+    ttl: 24 * 60 * 60,
   }),
   cookie: {
     httpOnly: true,
-    secure: true,       // true if HTTPS
+    secure: true,
     maxAge: 1000 * 60 * 60,
     sameSite: 'none',
   }
