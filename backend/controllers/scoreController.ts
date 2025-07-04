@@ -2,8 +2,13 @@ import { RequestHandler } from 'express';
 import User from '../models/User';
 
 export const updateUserScore: RequestHandler = async (req, res) => {
-  const userId = req.session.userId;
+  const userId = (req as any).user?.userId;
   const { score } = req.body;
+
+  if (!userId) {
+    res.status(401).json({ message: 'Unauthorized: userId missing from token' });
+    return;
+  }
 
   try {
     const user = await User.findByIdAndUpdate(userId, { score }, { new: true });
