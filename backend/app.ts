@@ -1,6 +1,7 @@
 import express from 'express';
 import cors from 'cors';
 import session from 'express-session';
+import MongoStore from 'connect-mongo';
 import questionRoutes from './routes/questionRoutes';
 import dbConnection from './utils/db';
 import dotenv from 'dotenv';
@@ -16,16 +17,21 @@ app.use(session({
   secret: process.env.SESSION_SECRET || 'your-secret-key',
   resave: false,
   saveUninitialized: false,
+  store: MongoStore.create({
+    mongoUrl: process.env.MONGODB_URI || 'your-mongodb-connection-string',
+    collectionName: 'sessions',
+    ttl: 24 * 60 * 60, // 1 day in seconds
+  }),
   cookie: {
     httpOnly: true,
-    secure: true,
+    secure: true,       // true if HTTPS
     maxAge: 1000 * 60 * 60,
-    sameSite: 'none' 
+    sameSite: 'none',
   }
 }));
 
 app.use(cors({
-  origin: 'https://aca-erp2022-2-quiz-sable.vercel.app', 
+  origin: 'https://aca-erp2022-2-quiz-sable.vercel.app',
   credentials: true
 }));
 
@@ -35,7 +41,6 @@ app.use('/api/questions', questionRoutes);
 app.use('/api/auth', authRoutes);
 app.use('/api/score', scoreRoutes);
 
-// Debug route to inspect session
 app.get('/api/session', (req, res) => {
   res.json({
     userId: req.session.userId,
@@ -44,6 +49,6 @@ app.get('/api/session', (req, res) => {
   });
 });
 
-
 export default app;
+
 
