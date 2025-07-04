@@ -19,7 +19,11 @@ const QuestionsPage: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    fetch('https://aca-erp2022-2-quiz.onrender.com/api/questions')
+    fetch('https://aca-erp2022-2-quiz.onrender.com/api/questions',
+       {
+        credentials: 'include',
+      }
+    )
       .then((res) => {
         if (!res.ok) throw new Error('Failed to load questions');
         return res.json();
@@ -60,6 +64,18 @@ const QuestionsPage: React.FC = () => {
     });
     setScore(total);
     setReviewMode(true);
+
+    fetch('https://aca-erp2022-2-quiz.onrender.com/api/score', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        credentials: 'include', 
+        body: JSON.stringify({ score: total })
+      })
+    .then(res => res.json())
+    .then(data => console.log('Score saved:', data))
+    .catch(err => console.error('Failed to save score', err));
   };
 
   if (loading) return <div>Loading questions...</div>;
