@@ -25,7 +25,7 @@ app.use(session({
 }));
 
 app.use(cors({
-  origin: 'https://aca-erp2022-2-quiz-sable.vercel.app/', 
+  origin: 'https://aca-erp2022-2-quiz-sable.vercel.app', 
   credentials: true
 }));
 
