@@ -18,3 +18,19 @@ export const updateUserScore: RequestHandler = async (req, res) => {
   }
 };
 
+export const getLeaderboard: RequestHandler = async (req, res) => {
+  const currentUserId = (req as any).user.userId;
+
+  try {
+    const users = await User.find({ score: { $ne: null } })
+      .sort({ score: -1 })
+      .select('_id email score');
+
+    res.json({
+      users,
+      currentUserId,
+    });
+  } catch (err) {
+    res.status(500).json({ message: 'Failed to load leaderboard', error: (err as Error).message });
+  }
+};
