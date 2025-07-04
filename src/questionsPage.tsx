@@ -19,12 +19,22 @@ const QuestionsPage: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    fetch('https://aca-erp2022-2-quiz.onrender.com/api/questions',
-       {
-        credentials: 'include',
-      }
-    )
+    const token = localStorage.getItem('token');
+    if (!token) {
+      setError('Not authenticated');
+      setLoading(false);
+      return;
+    }
+
+    fetch('https://aca-erp2022-2-quiz.onrender.com/api/questions', {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    })
       .then((res) => {
+        if (res.status === 401 || res.status === 403) {
+          throw new Error('Unauthorized - please login again');
+        }
         if (!res.ok) throw new Error('Failed to load questions');
         return res.json();
       })
@@ -65,17 +75,26 @@ const QuestionsPage: React.FC = () => {
     setScore(total);
     setReviewMode(true);
 
+    const token = localStorage.getItem('token');
+    if (!token) {
+      console.error('Not authenticated');
+      return;
+    }
+
     fetch('https://aca-erp2022-2-quiz.onrender.com/api/score', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        credentials: 'include', 
-        body: JSON.stringify({ score: total })
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({ score: total }),
+    })
+      .then((res) => {
+        if (!res.ok) throw new Error('Failed to save score');
+        return res.json();
       })
-    .then(res => res.json())
-    .then(data => console.log('Score saved:', data))
-    .catch(err => console.error('Failed to save score', err));
+      .then((data) => console.log('Score saved:', data))
+      .catch((err) => console.error('Failed to save score', err));
   };
 
   if (loading) return <div>Loading questions...</div>;

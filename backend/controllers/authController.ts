@@ -1,6 +1,7 @@
 import { Request, Response, RequestHandler } from 'express';
 import bcrypt from 'bcryptjs';
 import User from '../models/User';
+import { generateToken } from '../utils/jwt'; 
 declare module 'express-session' {
   interface SessionData {
     userId?: string;
@@ -26,7 +27,7 @@ export const registerUser: RequestHandler = async (req: Request, res: Response) 
   }
 };
 
-export const loginUser: RequestHandler = async (req, res)  => {
+export const loginUser = async (req: Request, res: Response): Promise<void> => {
   const { email, password } = req.body;
 
   try {
@@ -42,17 +43,12 @@ export const loginUser: RequestHandler = async (req, res)  => {
       return;
     }
 
-    req.session.userId = user._id.toString();
-
-    req.session.save((err) => {
-      if (err) {
-        return res.status(500).json({ message: 'Failed to save session' });
-      }
-
-      res.status(200).json({ message: 'Login successful', userId: user._id });
-    });
-
+    const token = generateToken(user._id.toString());
+    res.status(200).json({ message: 'Login successful', token, userId: user._id });
   } catch (err) {
     res.status(500).json({ message: 'Login failed', error: (err as Error).message });
   }
 };
+
+
+

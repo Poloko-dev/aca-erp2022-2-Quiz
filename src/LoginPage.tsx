@@ -19,7 +19,7 @@ const LoginPage: React.FC = () => {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password }),
-        credentials: 'include',
+        // no credentials here since JWT is handled manually
       });
 
       const data = await res.json();
@@ -28,18 +28,10 @@ const LoginPage: React.FC = () => {
         setErrorMsg(data.message || 'Login failed');
       } else {
         setSuccessMsg('Login successful!');
-
-        fetch('https://aca-erp2022-2-quiz.onrender.com/api/session', {
-            credentials: 'include'
-          })
-            .then(res => res.json())
-            .then(data => {
-              console.log('Session info:', data);
-            })
-            .catch(err => console.error('Session fetch failed:', err));
-
-
+        // Store JWT token in localStorage
+        localStorage.setItem('token', data.token);
         console.log('User ID:', data.userId);
+
         setTimeout(() => {
           navigate('/questions');
         }, 1500);
