@@ -25,7 +25,7 @@ app.use(session({
 }));
 
 app.use(cors({
-  origin: 'http://localhost:3000', 
+  origin: 'https://aca-erp2022-2-quiz-sable.vercel.app/', 
   credentials: true
 }));
 
